@@ -629,6 +629,224 @@ const DOC_ENTREGA_AGENDADA = `<div class="doc-inner">
   </div>
 </div>`;
 
+const DOC_DEPARA = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do fluxo</div>
+    <p class="doc-p">O fluxo <strong>De/Para Ocorrência AG1.0</strong> resolve um problema clássico de integração: transportadoras enviam ocorrências com seus próprios códigos internos (código 99 — genérico), mas o TMS do embarcador precisa dos códigos padronizados da empresa. A IA analisa a observação livre enviada pela transportadora, sugere o código correto do embarcador, e aguarda aprovação humana antes de gravar no banco.</p>
+    <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, e-mails de aprovação e parâmetros de contato variam por cliente implantado.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Agendamento e banco de dados</div>
+    <p class="doc-p"><strong>Dois schedulers:</strong> disparo principal toda <strong>segunda-feira às 07h15</strong> + verificação de itens expirados a <strong>cada hora no minuto 5</strong>.</p>
+    <p class="doc-p">Banco PostgreSQL do TMS. MongoDB (<code>deParaOcorrencia</code>) gerencia o ciclo de vida de cada aprovação.</p>
+    <table class="doc-table">
+      <tr><th>Tabela / Collection</th><th>Para que serve</th></tr>
+      <tr><td><code>evento_ocorrencia</code></td><td>Eventos registrados no TMS — fonte principal: busca ocorrências código 99 dos últimos 90 dias</td></tr>
+      <tr><td><code>ocorrencia</code></td><td>Catálogo de ocorrências do embarcador — IA consulta para sugerir o De/Para correto</td></tr>
+      <tr><td><code>conhecimento</code></td><td>Conhecimento de transporte vinculado ao evento</td></tr>
+      <tr><td><code>transportadora</code></td><td>Nome e OID da transportadora responsável</td></tr>
+      <tr><td><code>empresa</code></td><td>Nome da empresa embarcadora</td></tr>
+      <tr><td><code>grupo_usuario</code> / <code>grupo_usuario_contato</code></td><td>Contatos (e-mail e telefone) dos responsáveis por transportadora para envio da notificação</td></tr>
+      <tr><td><span class="tag tag-mongo">MongoDB deParaOcorrencia</span></td><td>Gerencia o estado de cada aprovação: <code>pending</code> · <code>approved</code> · <code>rejected</code> · <code>expired</code></td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal</div>
+    <p class="doc-p">Busca eventos com ocorrência código <code>99</code> (genérica da transportadora) nos últimos <strong>90 dias</strong>:</p>
+    <table class="doc-table">
+      <tr><th>Campo retornado</th><th>Significado</th></tr>
+      <tr><td><code>oid_evento</code></td><td>ID do evento no TMS</td></tr>
+      <tr><td><code>codigo_evento / nome_evento</code></td><td>Código e nome da ocorrência no sistema do embarcador</td></tr>
+      <tr><td><code>ocorrencia_transportadora</code></td><td>Código interno que a transportadora usou — é o que precisa ser convertido</td></tr>
+      <tr><td><code>observacao</code></td><td>Texto livre da transportadora — base que a IA usa para sugerir o De/Para</td></tr>
+      <tr><td><code>nome_transportadora</code></td><td>Transportadora que gerou o evento</td></tr>
+      <tr><td><code>nm_empresa</code></td><td>Empresa embarcadora associada ao evento</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Fluxo de aprovação humana</div>
+    <ol class="step-list">
+      <li>IA analisa a <code>observacao</code> da transportadora e consulta o catálogo de ocorrências do embarcador (<code>PostgressOcorrEmpresa</code>) para sugerir o <code>deParaCodigo</code></li>
+      <li>Fluxo gera uma <strong>página web de aprovação</strong> com os detalhes do De/Para sugerido</li>
+      <li>E-mail é enviado ao responsável do embarcador com link para a página — ele clica em <strong>Deferir</strong> ou <strong>Indeferir</strong></li>
+      <li>Resposta é registrada no MongoDB (<code>status: approved/rejected</code>, <code>decidedAt</code>, <code>decidedBy</code>)</li>
+      <li>Se <strong>aprovado</strong>: faz INSERT na tabela <code>ocorrencia</code> do TMS criando o De/Para oficial vinculado à transportadora</li>
+      <li>Transportadora é notificada por e-mail com os códigos melhorados</li>
+      <li>Itens sem resposta dentro do prazo são expirados automaticamente pelo scheduler horário</li>
+    </ol>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Transportadoras usam códigos próprios que não existem no TMS do embarcador, gerando ocorrências genéricas sem valor analítico. A equipe precisa interpretar manualmente cada observação para saber o que realmente aconteceu com a entrega.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O fluxo usa IA para interpretar o texto livre da transportadora e já sugerir o código correto — o embarcador apenas aprova ou rejeita com um clique no e-mail. Após aprovado, o De/Para é gravado no TMS e a transportadora recebe o feedback automaticamente. Resultado: qualidade dos dados de ocorrência aumenta progressivamente sem esforço manual.</p>
+  </div>
+</div>`;
+
+const DOC_REP_VENDEDOR = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do fluxo</div>
+    <p class="doc-p">O fluxo <strong>Representante/Vendedor</strong> é um assistente conversacional exclusivo para representantes e vendedores do embarcador. Via WhatsApp, eles conseguem rastrear entregas, cotar fretes e obter a DANFE de uma nota fiscal — tudo autenticado e sem precisar acessar o TMS diretamente.</p>
+    <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, coleções MongoDB e credenciais UAZAPI variam por cliente implantado.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Ativação e banco de dados</div>
+    <p class="doc-p">Ativado por <strong>webhook UAZAPI</strong> — sem scheduler, é 100% conversacional e em tempo real.</p>
+    <table class="doc-table">
+      <tr><th>Collection / Tabela</th><th>Para que serve</th></tr>
+      <tr><td><span class="tag tag-mongo">repChatHistory</span></td><td>Memória principal do agente — janela de 30 mensagens por conversa</td></tr>
+      <tr><td><span class="tag tag-mongo">repChatHistory_atendimento</span></td><td>Memória do contexto de atendimento — janela de 20 mensagens</td></tr>
+      <tr><td><span class="tag tag-mongo">repChatHistory_autenticacao</span></td><td>Memória do contexto de autenticação — janela de 20 mensagens</td></tr>
+      <tr><td><span class="tag tag-mongo">autenticacaoLaisa</span></td><td>Estado da autenticação por conversa: tentativas, status autenticado, data</td></tr>
+      <tr><td><span class="tag tag-mongo">repBuffer</span></td><td>Buffer anti-duplicata: armazena mensagens por <code>IdConversa</code> para deduplicação</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Sistema de autenticação</div>
+    <p class="doc-p">Antes de acessar qualquer funcionalidade, o representante precisa se autenticar informando <strong>Nº NF + Série + CNPJ</strong>. O sistema possui:</p>
+    <table class="doc-table">
+      <tr><th>Regra</th><th>Detalhe</th></tr>
+      <tr><td>Máximo de tentativas</td><td>3 tentativas de autenticação — após isso, acesso bloqueado na sessão</td></tr>
+      <tr><td>Estado persistido</td><td>MongoDB <code>autenticacaoLaisa</code> guarda <code>tentativasAut</code>, <code>autenticado</code> (boolean) e <code>data</code></td></tr>
+      <tr><td>Contexto separado</td><td>Memória de autenticação isolada da memória de atendimento — evita contaminação de contexto</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Menu de funcionalidades</div>
+    <p class="doc-p">Após autenticado, o representante recebe um <strong>menu de botões</strong> via UAZAPI:</p>
+    <table class="doc-table">
+      <tr><th>Opção</th><th>O que acontece</th></tr>
+      <tr><td>Rastrear uma entrega</td><td>IA consulta o TMS e retorna o status atualizado da entrega</td></tr>
+      <tr><td>Cotação de frete</td><td>IA calcula e responde o valor do frete via chat</td></tr>
+      <tr><td>Espelho Nota Fiscal (DANFE)</td><td>Busca o PDF via <code>ws-tms.lincros.com/api/nota/buscarDanfe</code> pela chave NFe e envia o documento direto no WhatsApp</td></tr>
+      <tr><td>Nenhuma</td><td>Encerra o atendimento</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:8px">Aceita <strong>texto e áudio</strong> — áudio transcrito automaticamente via <strong>Groq Whisper large-v3</strong>.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Representantes e vendedores precisam constantemente consultar status de entrega e emitir DANFE para clientes — hoje fazem isso ligando para a operação ou acessando o TMS, gerando retrabalho e dependência.</p>
+    <p class="doc-p"><strong>Como vender:</strong> Canal exclusivo e autenticado no WhatsApp — o representante rastreia, cota e obtém documentos fiscais sem sair do celular. A Laisa atende em texto ou áudio, com memória de contexto de até 30 mensagens. Tudo rastreado e seguro por autenticação por NF.</p>
+  </div>
+</div>`;
+
+const DOC_RASTREIO_CLIENTE = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do fluxo</div>
+    <p class="doc-p">O fluxo <strong>Rastreio Cliente — API Oficial</strong> notifica automaticamente o <strong>cliente destinatário</strong> via WhatsApp Business sempre que uma nova ocorrência é registrada na nota fiscal dele no TMS — sem que ele precise perguntar nada. É o rastreio proativo da entrega direto no celular do cliente.</p>
+    <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, número WhatsApp Business, tokens GUPSHUP e UAZAPI variam por cliente implantado.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Ativação e banco de dados</div>
+    <p class="doc-p">Ativado por <strong>webhook disparado pelo próprio TMS</strong> a cada nova ocorrência registrada — event-driven, sem scheduler.</p>
+    <table class="doc-table">
+      <tr><th>Tabela / Collection</th><th>Para que serve</th></tr>
+      <tr><td><code>rastreio_cliente</code> (PostgreSQL)</td><td>Grava cada notificação enviada: destinatário, ocorrência, NF, chave, mensagem e data</td></tr>
+      <tr><td><code>entrega_nps</code> (PostgreSQL)</td><td>Registra a avaliação de NPS respondida pelo cliente após a entrega</td></tr>
+      <tr><td><span class="tag tag-mongo">MongoDB rastreioHistoricoEnvio</span></td><td>Histórico completo de todos os envios com remetente, destinatário, ocorrência e status</td></tr>
+      <tr><td>Oracle Object Storage</td><td>Armazenamento temporário do PDF da DANFE quando o cliente solicita — arquivo deletado após envio</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>Filtros antes do envio</div>
+    <p class="doc-p">O fluxo aplica múltiplos filtros para garantir que só notificações relevantes cheguem ao cliente:</p>
+    <table class="doc-table">
+      <tr><th>Filtro</th><th>O que faz</th></tr>
+      <tr><td><code>ocorrenciaRestrita = true</code></td><td>Bloqueia envio — ocorrência é confidencial e não deve ser divulgada ao destinatário</td></tr>
+      <tr><td><code>filtrarDevolucao</code></td><td>Para o fluxo se o conhecimento for do tipo 3 (devolução) — evita notificar cliente de retorno</td></tr>
+      <tr><td><code>filtrarConhecimentos</code></td><td>Filtra apenas tipos de conhecimento 0, 1, 3, 4 e 17 (etapas reais de transporte)</td></tr>
+      <tr><td>Validação remetente/destinatário</td><td>Confirma se remetente é unidade da empresa e se destinatário tem WhatsApp ativo via UAZAPI</td></tr>
+      <tr><td>Ocorrência com mais de 1 dia</td><td>Ocorrências antigas são ignoradas — evita spam de notificações retroativas</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Templates e interações com o cliente</div>
+    <p class="doc-p">Enviados via <strong>GUPSHUP</strong> (WhatsApp Business oficial) com 3 templates distintos:</p>
+    <table class="doc-table">
+      <tr><th>Template</th><th>Quando é usado</th><th>Dados enviados</th></tr>
+      <tr><td><code>OC00</code></td><td>Ocorrência de coleta registrada</td><td>Razão destinatário, pedido de compra, NF, série e link de rastreio</td></tr>
+      <tr><td><code>OC01</code></td><td>Saída para entrega</td><td>Razão do destinatário</td></tr>
+      <tr><td><code>Genérico</code></td><td>Todas as demais ocorrências</td><td>9 parâmetros: destinatário, NF, série, data emissão, remetente, descrição ocorrência, data ocorrência, transportadora e link de rastreio</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:8px">Após receber a notificação, o cliente pode interagir com botões de resposta:</p>
+    <table class="doc-table">
+      <tr><th>Botão</th><th>O que acontece</th></tr>
+      <tr><td>Visualizar NF</td><td>Busca DANFE via WS TMS, faz upload no Oracle Storage e envia o PDF no WhatsApp — arquivo deletado em seguida</td></tr>
+      <tr><td>WhatsApp</td><td>Laisa envia o link/contato do WhatsApp da empresa para o cliente falar com um humano</td></tr>
+      <tr><td>E-mail</td><td>Laisa envia o e-mail de contato da empresa</td></tr>
+      <tr><td>NPS (após entrega)</td><td>Cliente avalia a experiência — nota gravada na tabela <code>entrega_nps</code> do PostgreSQL</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Clientes ligam para o embarcador pedindo posição da entrega porque não recebem nenhuma comunicação proativa. Isso consome tempo da equipe de atendimento e gera insatisfação.</p>
+    <p class="doc-p"><strong>Como vender:</strong> A cada ocorrência no TMS, o cliente recebe automaticamente uma mensagem via WhatsApp Business oficial com o status, link de rastreio e opção de visualizar a DANFE. Após a entrega, ainda coleta NPS automaticamente. Tudo rastreado no banco — o cliente tem visibilidade total da jornada de entrega sem precisar ligar para ninguém.</p>
+  </div>
+</div>`;
+
+const DOC_PROCESSADOR_CANHOTO = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do fluxo</div>
+    <p class="doc-p">O fluxo <strong>Processador de Canhotos</strong> é um canal conversacional B2B via WhatsApp para que <strong>representantes das transportadoras</strong> enviem o comprovante de entrega (canhoto) diretamente pelo celular — sem precisar de e-mail ou acesso ao sistema. A IA recebe a imagem, extrai os dados e registra no TMS automaticamente.</p>
+    <p class="doc-p"><strong>Atenção:</strong> <code>oidEmpresa</code>, credenciais UAZAPI e coleções MongoDB variam por cliente implantado.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Ativação e banco de dados</div>
+    <p class="doc-p">Ativado por <strong>webhook UAZAPI</strong> — conversacional em tempo real, sem scheduler.</p>
+    <table class="doc-table">
+      <tr><th>Collection / Tabela</th><th>Para que serve</th></tr>
+      <tr><td><code>nota_fiscal</code> (PostgreSQL)</td><td>Busca a NF pelo número + série + OID empresa para validar o documento antes de aceitar o canhoto</td></tr>
+      <tr><td><code>filial_transportadora</code> (PostgreSQL)</td><td>Valida o CNPJ informado pelo usuário — confirma que é uma transportadora cadastrada no TMS</td></tr>
+      <tr><td><span class="tag tag-mongo">transpBuffer</span></td><td>Buffer anti-duplicata por <code>idGeral</code> — garante processamento único de cada mensagem</td></tr>
+      <tr><td><span class="tag tag-mongo">transpHistoricoConversa</span></td><td>Histórico completo de todas as mensagens trocadas (origem, tipo, data)</td></tr>
+      <tr><td><span class="tag tag-mongo">transpAgentMemory</span></td><td>Memória do agente de IA — janela de 20 mensagens por sessão</td></tr>
+      <tr><td><span class="tag tag-mongo">transpTabAux</span></td><td>Cadastro auxiliar da transportadora: nome, CNPJ, OID transportadora, flag de bloqueio</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Fluxo de autenticação da transportadora</div>
+    <p class="doc-p">O sistema distingue <strong>1º acesso</strong> (insert) de <strong>renovação de acesso</strong> (update) com fluxos separados:</p>
+    <table class="doc-table">
+      <tr><th>Situação</th><th>O que acontece</th></tr>
+      <tr><td>1º acesso — sem cadastro no <code>transpTabAux</code></td><td>Agente solicita nome, CNPJ e confirmação da transportadora — valida no PostgreSQL (<code>filial_transportadora</code>) e faz insert no MongoDB</td></tr>
+      <tr><td>Retorno — cadastro já existe</td><td>Agente reconhece o usuário e atualiza os dados se necessário (<code>mensagem-update</code>)</td></tr>
+      <tr><td>Flag <code>bloqueado = true</code></td><td>Acesso negado — transportadora está bloqueada no sistema</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Processamento do canhoto</div>
+    <p class="doc-p">Aceita <strong>texto, áudio e imagem</strong>:</p>
+    <table class="doc-table">
+      <tr><th>Tipo</th><th>Como é processado</th></tr>
+      <tr><td>Imagem</td><td>Baixada via UAZAPI, IA extrai os dados do canhoto (NF, série, assinatura, data) e valida contra o TMS</td></tr>
+      <tr><td>Áudio</td><td>Baixado via UAZAPI e transcrito com <strong>Groq Whisper large-v3</strong> antes de processar</td></tr>
+      <tr><td>Arquivo não suportado</td><td>Laisa responde que só aceita imagens, texto e áudio</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:8px">Validação da NF: busca no TMS via <code>ws-tms.lincros.com/api/v2/nota/buscarNotaFiscal</code> pela chave NFe, ou diretamente no PostgreSQL por <code>nr_nota_fiscal + nm_serie + oid_empresa</code>.</p>
+    <p class="doc-p">Ações do agente: <code>mensagem</code> (responde) · <code>mensagem-insert</code> (cadastra novo usuário) · <code>mensagem-update</code> (atualiza cadastro existente).</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Transportadoras precisam enviar canhotos por e-mail, o que gera atraso, perda de arquivos e retrabalho para a equipe que precisa identificar qual NF cada canhoto corresponde.</p>
+    <p class="doc-p"><strong>Como vender:</strong> A transportadora envia a foto do canhoto direto pelo WhatsApp — a IA lê, valida contra o TMS e registra automaticamente. Sem e-mail, sem planilha, sem identificação manual. O representante da transportadora é cadastrado automaticamente no primeiro acesso e reconhecido nos envios seguintes. Todo o histórico de conversas é rastreado e auditável.</p>
+  </div>
+</div>`;
+
 /* ═══════════════════════════════════════════════════════
    DATA
 ═══════════════════════════════════════════════════════ */
@@ -645,12 +863,16 @@ const data = [
     ]
   },
   {
-    label: 'Produtos TMS – Transportador / Motorista',
+    label: 'FLUXOS - TMS',
     items: [
       { name: 'Acompanhamento entregas do dia', tag: 'AG7.0 · AG5.0 · AG5.2', tagClass: 'tag-tms', doc: DOC_ENTREGAS_DIA, docOpen: false },
       { name: 'Follow-up documentos sem ocorrência de coleta', tag: 'AG6.0 · AG5.0 · AG5.2', tagClass: 'tag-tms', doc: DOC_SEM_COLETA, docOpen: false },
       { name: 'Follow-up entregas em atraso', tag: 'AG3.0 · AG5.0 · AG5.2', tagClass: 'tag-tms', doc: DOC_EM_ATRASO, docOpen: false },
-      { name: 'Follow-up entregas sem canhoto', tag: 'AG4.0 · AG5.0 · AG5.2', tagClass: 'tag-tms', doc: DOC_SEM_CANHOTO, docOpen: false }
+      { name: 'Follow-up entregas sem canhoto', tag: 'AG4.0 · AG5.0 · AG5.2', tagClass: 'tag-tms', doc: DOC_SEM_CANHOTO, docOpen: false },
+      { name: 'De/Para Ocorrência', tag: 'AG1.0', tagClass: 'tag-tms', doc: DOC_DEPARA, docOpen: false },
+      { name: 'Representante / Vendedor', tag: 'AG1.0', tagClass: 'tag-tms', doc: DOC_REP_VENDEDOR, docOpen: false },
+      { name: 'Rastreio Cliente — API Oficial', tag: null, tagClass: null, doc: DOC_RASTREIO_CLIENTE, docOpen: false },
+      { name: 'Processador de Canhotos', tag: null, tagClass: null, doc: DOC_PROCESSADOR_CANHOTO, docOpen: false }
     ]
   }
 ];
