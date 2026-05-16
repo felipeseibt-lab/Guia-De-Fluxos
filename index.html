@@ -130,7 +130,7 @@ const DOC_FIM_ROTA = `<div class="doc-inner">
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Banco de dados</div>
-    <p class="doc-p">Credencial: <code>Torre C</code> — banco <code>HBMDM_FORTLEV</code>, schema <code>OPMDM</code></p>
+    <p class="doc-p">Banco configurado por cliente — ex: <code>HBMDM_[EMPRESA]</code>, schema <code>OPMDM</code></p>
     <table class="doc-table">
       <tr><th>Tabela</th><th>Para que serve</th></tr>
       <tr><td><code>TB_ROTA</code></td><td>Dados principais da rota: placa, motorista, unidade, situação</td></tr>
@@ -189,7 +189,7 @@ const DOC_ENTREGAS_DIA = `<div class="doc-inner">
     <div class="deps-box">
       <div class="dep-item"><span class="dep-code">AG7.0</span><div class="dep-desc"><strong>Entregas do dia</strong> — Fluxo principal. Roda em 4 horários fixos: <strong>08h, 12h, 18h e 23h30</strong>. Consulta notas fiscais com previsão de entrega para o dia, gera planilha por transportadora/filial e envia e-mail de cobrança + WhatsApp via Laisa. Registra cada envio no MongoDB com ID rastreável embutido no e-mail.</div></div>
       <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados há mais de 3 dias sem resposta e com menos de 3 tentativas. Checa a caixa Gmail da Laisa; se não houve retorno, reenvia a cobrança automaticamente.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Outlook a cada minuto. Identifica respostas das transportadoras pelo ID embutido no e-mail, aciona IA para classificar o anexo recebido (canhoto, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail a cada minuto. Identifica respostas das transportadoras pelo ID embutido no e-mail, aciona IA para classificar o anexo recebido (canhoto, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
     </div>
   </div>
   <div class="doc-divider"></div>
@@ -243,7 +243,7 @@ const DOC_SEM_COLETA = `<div class="doc-inner">
     <div class="deps-box">
       <div class="dep-item"><span class="dep-code">AG6.0</span><div class="dep-desc"><strong>Notas sem coleta</strong> — Fluxo principal. Roda <strong>uma vez por mês, no dia 5 às 07h10</strong>. Busca notas fiscais sem ocorrência de coleta registrada, envia e-mail com planilha anexa para a transportadora e consolidado interno para a equipe. Reforça via WhatsApp quando há celular cadastrado.</div></div>
       <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados sem resposta e reenvia a cobrança automaticamente após o prazo configurado.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Outlook. Identifica e classifica os anexos enviados pela transportadora em resposta (EDI de coleta, ocorrência ou prazo) e atualiza o TMS.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Identifica e classifica os anexos enviados pela transportadora em resposta (EDI de coleta, ocorrência ou prazo) e atualiza o TMS.</div></div>
     </div>
   </div>
   <div class="doc-divider"></div>
@@ -282,7 +282,7 @@ const DOC_EM_ATRASO = `<div class="doc-inner">
     <div class="deps-box">
       <div class="dep-item"><span class="dep-code">AG3.0</span><div class="dep-desc"><strong>Notas em atraso</strong> — Fluxo principal. Roda a <strong>cada 5 dias às 09h30</strong>. Busca entregas com prazo vencido nos últimos 30 dias sem confirmação de recebimento, envia e-mail com planilha + destaque do documento com maior atraso, e consolida resumo interno para a equipe.</div></div>
       <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails sem resposta e reenvia a cobrança automaticamente após o prazo configurado (máx. 3 tentativas).</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Outlook. Classifica anexos recebidos (comprovante de entrega, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Classifica anexos recebidos (comprovante de entrega, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
     </div>
   </div>
   <div class="doc-divider"></div>
@@ -318,7 +318,7 @@ const DOC_SEM_CANHOTO = `<div class="doc-inner">
     <div class="deps-box">
       <div class="dep-item"><span class="dep-code">AG4.0</span><div class="dep-desc"><strong>Canhoto</strong> — Fluxo principal. Roda <strong>toda segunda-feira às 07h</strong>. Busca entregas realizadas nos últimos 30 dias com ocorrência de entrega (entreganota ou finalizartransporte) mas sem anexo de canhoto. Envia e-mail com planilha para a transportadora e resumo consolidado para o embarcador.</div></div>
       <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica quais cobranças ainda não tiveram resposta e reenvia automaticamente (máx. 3 tentativas).</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Outlook. Quando a transportadora responde com o canhoto em anexo, a IA identifica, extrai os dados e registra o comprovante no TMS automaticamente.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Quando a transportadora responde com o canhoto em anexo, a IA identifica, extrai os dados e registra o comprovante no TMS automaticamente.</div></div>
     </div>
   </div>
   <div class="doc-divider"></div>
@@ -351,7 +351,7 @@ const DOC_TEMPERATURA = `<div class="doc-inner">
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Banco de dados</div>
-    <p class="doc-p">Credencial: <code>Torre A</code> — banco <code>HBMDM_SAOSALVADOR</code>, schema <code>OPMDM</code></p>
+    <p class="doc-p">Banco configurado por cliente — ex: <code>HBMDM_[EMPRESA]</code>, schema <code>OPMDM</code></p>
     <table class="doc-table">
       <tr><th>Tabela</th><th>Para que serve no fluxo</th></tr>
       <tr><td><code>TB_ROTA</code></td><td>Dados da rota: situação, motorista, placa e eficiência atual de temperatura</td></tr>
@@ -473,10 +473,17 @@ const DOC_INICIO_ROTA = `<div class="doc-inner">
 
 const DOC_SEQUENCIA = `<div class="doc-inner">
   <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do fluxo</div>
-    <p class="doc-p">O fluxo <strong>Análise de Sequência de Rota</strong> detecta em tempo real quando um motorista realiza entregas fora da ordem planejada pelo roteirizador. Ao identificar a divergência, a IA <strong>Laisa</strong> notifica o motorista via WhatsApp para entender o motivo — e escala para a Torre nos casos de resposta evasiva ou problema interno.</p>
-    <p class="doc-p">Roda <strong>a cada hora</strong> entre <strong>05h e 19h</strong>. Também calcula um índice de eficiência da rota combinando tempo e distância percorrida.</p>
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
+    <p class="doc-p">Este produto é composto por <strong>dois fluxos que atuam em sequência</strong> para garantir que todo desvio de sequência de rota seja identificado, justificado e registrado — tanto durante quanto após a viagem.</p>
     <p class="doc-p"><strong>Atenção:</strong> nome da empresa, banco de dados e OID da empresa variam conforme o cliente implantado — a lógica do fluxo é a mesma para todos.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
+    <div class="deps-box">
+      <div class="dep-item"><span class="dep-code">Em Andamento</span><div class="dep-desc"><strong>Análise de Sequência de Rota em Andamento</strong> — Roda <strong>a cada hora entre 05h e 19h</strong>. Detecta em tempo real entregas realizadas fora da ordem planejada enquanto a rota ainda está ativa (<code>CdSituacao = 2</code>). A Laisa notifica o motorista imediatamente para entender o motivo do desvio.</div></div>
+      <div class="dep-item"><span class="dep-code">Finalizadas</span><div class="dep-desc"><strong>Análise de Sequência de Rota Finalizadas</strong> — Roda <strong>a cada hora entre 05h e 19h</strong>. Follow-up pós-rota: busca tratamentos de sequência divergente cujas rotas já encerraram (<code>CdSituacao = 3</code>) mas o motorista ainda não justificou. Reencaminha até 3 vezes e escala para a Torre se necessário.</div></div>
+    </div>
   </div>
   <div class="doc-divider"></div>
   <div class="doc-block">
@@ -485,17 +492,17 @@ const DOC_SEQUENCIA = `<div class="doc-inner">
     <table class="doc-table">
       <tr><th>Tabela</th><th>Para que serve</th></tr>
       <tr><td><code>TB_ENTREGA</code></td><td>Entregas da rota — fonte principal: <code>IdSequencia</code> (planejada) vs <code>IdSequenciaRealizada</code> (executada)</td></tr>
-      <tr><td><code>TB_ROTA</code></td><td>Dados de performance: tempo e distância prevista vs realizada</td></tr>
+      <tr><td><code>TB_ROTA</code></td><td>Dados de performance e situação da rota (<code>CdSituacao</code>): 2 = em andamento · 3 = encerrada</td></tr>
       <tr><td><code>TB_MOTORISTA</code></td><td>Nome e telefone do motorista</td></tr>
-      <tr><td><code>TB_TRATAMENTO_EVENTO</code></td><td>Abre e controla o tratamento de sequência divergente</td></tr>
+      <tr><td><code>TB_TRATAMENTO_EVENTO</code></td><td>Abre e controla o tratamento de sequência divergente — compartilhado pelos dois fluxos</td></tr>
       <tr><td><code>TB_EVENTO_ACAO</code></td><td>Registra cada ação e tentativa de notificação</td></tr>
       <tr><td><code>TB_MENSAGEM</code></td><td>Histórico de mensagens trocadas com o motorista</td></tr>
     </table>
   </div>
   <div class="doc-divider"></div>
   <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal — Busca Entregas Divergentes</div>
-    <p class="doc-p">Busca entregas realizadas onde a sequência executada difere da planejada (<code>IdSequenciaCorreta = 0</code>), e calcula métricas de performance da rota:</p>
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta 1 — Em Andamento (Busca Entregas Divergentes)</div>
+    <p class="doc-p">Busca entregas realizadas onde a sequência executada difere da planejada (<code>IdSequenciaCorreta = 0</code>), com rota ainda ativa (<code>CdSituacao = 2</code>):</p>
     <table class="doc-table">
       <tr><th>Campo / Cálculo</th><th>Significado</th></tr>
       <tr><td><code>IdSequencia</code> vs <code>IdSequenciaRealizada</code></td><td>Sequência planejada pelo roteirizador vs sequência que o motorista realmente executou</td></tr>
@@ -509,20 +516,34 @@ const DOC_SEQUENCIA = `<div class="doc-inner">
   </div>
   <div class="doc-divider"></div>
   <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta 2 — Finalizadas (Buscar Rotas com sequências divergentes)</div>
+    <p class="doc-p">Busca tratamentos abertos de sequência divergente cujas rotas já estão <strong>encerradas</strong> e o motorista ainda não respondeu:</p>
+    <table class="doc-table">
+      <tr><th>Filtro</th><th>Significado</th></tr>
+      <tr><td><code>te.Status = 1</code></td><td>Tratamento ainda em aberto — motorista não justificou</td></tr>
+      <tr><td><code>r.CdSituacao = 3</code></td><td>Rota já encerrada — motorista voltou mas não respondeu sobre o desvio</td></tr>
+      <tr><td><code>Task = 'Sequencia de entrega divergente'</code></td><td>Filtra apenas tratamentos originados pelo fluxo em andamento</td></tr>
+      <tr><td><code>MAX(IdTratamento) por CdRota</code></td><td>Garante que só o tratamento mais recente de cada rota seja processado</td></tr>
+      <tr><td><code>QtdNotificacao &lt; 3</code></td><td>Limite de 3 tentativas — após isso, encerra como escalado para a Torre</td></tr>
+    </table>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>IA Laisa — Notificação e ações possíveis</div>
     <p class="doc-p">A Laisa notifica o motorista via <strong>UAZAPI</strong> em texto ou <strong>áudio via ElevenLabs</strong>. Pode também enviar um <strong>vídeo explicativo</strong> sobre a importância da sequência de entrega.</p>
     <table class="doc-table">
-      <tr><th>Ação da IA</th><th>O que o sistema faz</th></tr>
-      <tr><td><code>INTERNO</code></td><td>Problema de ordem interna da operação → aciona equipe da Torre</td></tr>
-      <tr><td><code>RESPOSTA EVASIVA/OMISSA</code></td><td>Motorista não explica ou responde de forma vaga → aciona equipe da Torre</td></tr>
-      <tr><td>Justificativa aceita</td><td>Encerra tratamento (Status=2) com observação registrada</td></tr>
+      <tr><th>Ação da IA</th><th>Quando</th><th>O que o sistema faz</th></tr>
+      <tr><td><code>INTERNO</code></td><td>Problema de ordem interna da operação</td><td>Aciona equipe da Torre imediatamente</td></tr>
+      <tr><td><code>RESPOSTA EVASIVA/OMISSA</code></td><td>Motorista não explica ou responde de forma vaga</td><td>Aciona equipe da Torre imediatamente</td></tr>
+      <tr><td>Justificativa aceita</td><td>Motorista explica o motivo do desvio</td><td>Encerra tratamento (Status=2) com observação registrada</td></tr>
+      <tr><td>Sem resposta (Finalizadas)</td><td><code>QtdNotificacao &gt;= 3</code></td><td>Encerra com Status=3 e Etapa='Escalado para torre'</td></tr>
     </table>
   </div>
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Motoristas que desviam da rota planejada geram mais km rodado, atrasos em clientes subsequentes e distorção nos KPIs de roteirização. Sem visibilidade em tempo real, o gestor só percebe o problema no fechamento do dia.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O fluxo monitora a sequência de entregas hora a hora, calcula o índice de eficiência real da rota e questiona o motorista automaticamente quando há desvio. A IA entende a justificativa, registra e escala se necessário — sem precisar de nenhum operador monitorando.</p>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Motoristas que desviam da rota planejada geram mais km rodado, atrasos em clientes subsequentes e distorção nos KPIs de roteirização. Desvios sem justificativa registrada impedem análise de melhoria e responsabilização.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto cobre todo o ciclo — notifica em tempo real durante a rota e garante que nenhum desvio fique sem resposta mesmo após a viagem encerrar. A IA questiona, entende a justificativa, registra e escala automaticamente. O cliente tem rastreabilidade completa de cada ocorrência, com causa registrada e auditável.</p>
   </div>
 </div>`;
 
@@ -857,8 +878,7 @@ const data = [
       { name: 'Análise de rota – Fim de Rota', tag: null, tagClass: null, doc: DOC_FIM_ROTA, docOpen: false },
       { name: 'Análise de Temperatura V2', tag: null, tagClass: null, doc: DOC_TEMPERATURA, docOpen: false },
       { name: 'Análise de Rota – Início de Rota', tag: null, tagClass: null, doc: DOC_INICIO_ROTA, docOpen: false },
-      { name: 'Análise de Sequência de Rota', tag: null, tagClass: null, doc: DOC_SEQUENCIA, docOpen: false },
-      { name: 'Entrega Atrasada', tag: null, tagClass: null, doc: DOC_ENTREGA_ATRASADA, docOpen: false },
+      { name: 'Análise de Sequência de Rota em Andamento', tag: null, tagClass: null, doc: DOC_SEQUENCIA, docOpen: false },
       { name: 'Entrega Agendada Não Realizada', tag: null, tagClass: null, doc: DOC_ENTREGA_AGENDADA, docOpen: false }
     ]
   },
