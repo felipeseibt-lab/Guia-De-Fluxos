@@ -78,6 +78,15 @@
   .step-list { list-style: none; padding: 0; margin: 4px 0 0; counter-reset: steps; }
   .step-list li { counter-increment: steps; display: flex; gap: 10px; margin-bottom: 7px; align-items: flex-start; }
   .step-list li::before { content: counter(steps); min-width: 20px; height: 20px; border-radius: 50%; background: var(--amber); color: var(--amber-dark); font-size: 11px; font-weight: 500; font-family: var(--mono); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .prereq-list { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  .prereq-list li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 13px; line-height: 1.6; align-items: start; }
+  .prereq-list li::before { content: "✓"; width: 18px; height: 18px; border-radius: 50%; background: var(--teal-light); color: var(--teal); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .prereq-li-content { display: block; }
+  .prereq-obs { display: block; font-size: 12px; color: var(--text-muted); background: var(--surface2); border-left: 2px solid var(--amber); padding: 6px 10px; border-radius: 0 4px 4px 0; line-height: 1.5; margin-top: 5px; }
+  .amb-list { list-style: none; padding: 0; margin: 4px 0 0; display: flex; flex-direction: column; gap: 8px; }
+  .amb-list li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 13px; line-height: 1.6; align-items: start; }
+  .amb-list li::before { content: "→"; width: 18px; height: 18px; border-radius: 50%; background: var(--blue-light); color: var(--blue); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .amb-li-content { display: block; }
 
   /* DEPS */
   .deps-box { background: var(--surface2); border: .5px solid var(--border-strong); border-radius: var(--radius); padding: 12px 14px; margin-top: 6px; }
@@ -115,6 +124,40 @@
 </div>
 <script>
 document.getElementById('gen-date').textContent = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+/* ── PRÉ-REQUISITOS REUTILIZÁVEIS ── */
+const PREREQ_PADRAO = `
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Pré-Requisitos</div>
+    <ul class="prereq-list">
+      <li><div class="prereq-li-content">Criar <strong>usuário Web-service</strong> no TMS do cliente — necessário para que os fluxos possam consultar e atualizar informações via API.</div></li>
+      <li><div class="prereq-li-content">Criar a <strong>Empresa no ambiente de produção</strong> para obter o <code>OidEmpresa</code> — necessário para que a Laisa identifique de qual empresa se trata e busque os dados corretos no ambiente de produção.</div></li>
+      <li><div class="prereq-li-content">A <strong>Lincros disponibiliza o número de telefone e a conta Meta</strong> (WhatsApp Business) utilizada para os envios via Laisa.</div></li>
+    </ul>
+  </div>`;
+
+const PREREQ_GRUPO_USUARIO = `
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Pré-Requisitos</div>
+    <ul class="prereq-list">
+      <li><div class="prereq-li-content">Criar <strong>usuário Web-service</strong> no TMS do cliente — necessário para que os fluxos possam consultar e atualizar informações via API.</div></li>
+      <li><div class="prereq-li-content">Criar a <strong>Empresa no ambiente de produção</strong> para obter o <code>OidEmpresa</code> — necessário para que a Laisa identifique de qual empresa se trata e busque os dados corretos no ambiente de produção.</div></li>
+      <li><div class="prereq-li-content">Criar o <strong>Grupo de Usuário</strong> no TMS para especificar os responsáveis por tema: Ocorrências, Ordem de Coleta, BID, entre outros.<div class="prereq-obs">⚠️ O grupo de usuário deve estar sempre atualizado — é através dele que o sistema designa os responsáveis que serão notificados.</div></div></li>
+      <li><div class="prereq-li-content">A <strong>Lincros disponibiliza o número de telefone e a conta Meta</strong> (WhatsApp Business) utilizada para os envios via Laisa.</div></li>
+    </ul>
+  </div>`;
+
+const PREREQ_RASTREIO = `
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Pré-Requisitos</div>
+    <ul class="prereq-list">
+      <li><div class="prereq-li-content">Criar <strong>usuário Web-service</strong> no TMS do cliente — necessário para que os fluxos possam consultar e atualizar informações via API.</div></li>
+      <li><div class="prereq-li-content">Criar a <strong>Empresa no ambiente de produção</strong> para obter o <code>OidEmpresa</code> — necessário para que a Laisa identifique de qual empresa se trata e busque os dados corretos no ambiente de produção.</div></li>
+      <li><div class="prereq-li-content">Solicitar à <strong>equipe de desenvolvimento</strong> a criação do webhook no TMS. Após a criação, o time de desenvolvimento entrará em contato solicitando as ocorrências — e o time comercial fará a vinculação dessas ocorrências ao webhook.</div></li>
+      <li><div class="prereq-li-content">A <strong>Lincros disponibiliza o número de telefone e a conta Meta</strong> (WhatsApp Business) utilizada para os envios via Laisa.</div></li>
+    </ul>
+  </div>`;
+
 const flagIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>`;
 
 /* ═══════════════════════════════════════════════════════
@@ -144,6 +187,8 @@ const DOC_FIM_ROTA = `<div class="doc-inner">
       <tr><td><code>TB_MOTIVO_DEVOLUCAO</code></td><td>Motivo da devolução informado pelo motorista no app</td></tr>
     </table>
   </div>
+
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal — Buscar Rotas</div>
@@ -157,6 +202,8 @@ const DOC_FIM_ROTA = `<div class="doc-inner">
       <tr><td><code>StatusRota</code> (calculado)</td><td><code>EntregasFeitas</code> · <code>DevolucaoPendente</code> · <code>RotaAndamento</code></td></tr>
     </table>
   </div>
+
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>IA Laisa — Mensagem e ações possíveis</div>
@@ -170,176 +217,28 @@ const DOC_FIM_ROTA = `<div class="doc-inner">
       <tr><td><code>AvisarTorre</code></td><td>Problema mecânico → registra para equipe da Torre</td></tr>
     </table>
   </div>
+
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Motoristas esquecem de encerrar a viagem no app, deixando a rota com situação incorreta no TMS e prejudicando KPIs e faturamento do cliente.</p>
     <p class="doc-p"><strong>Diferencial:</strong> 100% automático, IA personaliza cada mensagem pelo nome do motorista, pode encerrar a rota remotamente, e toda interação é rastreada e auditável no banco.</p>
   </div>
-</div>`;
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
 
-const DOC_ENTREGAS_DIA = `<div class="doc-inner">
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
-    <p class="doc-p">Automatiza o acompanhamento diário de entregas previstas, cobrando as transportadoras sobre documentos em aberto ao longo do dia e realizando o fechamento ao final. Elimina a necessidade de cobrança manual pela equipe interna.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
-    <div class="deps-box">
-      <div class="dep-item"><span class="dep-code">AG7.0</span><div class="dep-desc"><strong>Entregas do dia</strong> — Fluxo principal. Roda em 4 horários fixos: <strong>08h, 12h, 18h e 23h30</strong>. Consulta notas fiscais com previsão de entrega para o dia, gera planilha por transportadora/filial e envia e-mail de cobrança + WhatsApp via Laisa. Registra cada envio no MongoDB com ID rastreável embutido no e-mail.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados há mais de 3 dias sem resposta e com menos de 3 tentativas. Checa a caixa Gmail da Laisa; se não houve retorno, reenvia a cobrança automaticamente.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail a cada minuto. Identifica respostas das transportadoras pelo ID embutido no e-mail, aciona IA para classificar o anexo recebido (canhoto, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
-    </div>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Banco de dados (AG7.0)</div>
-    <p class="doc-p">Banco PostgreSQL do TMS da empresa. Tabelas principais consultadas:</p>
-    <table class="doc-table">
-      <tr><th>Tabela</th><th>Para que serve</th></tr>
-      <tr><td><code>conhecimento</code></td><td>Conhecimentos de transporte — base principal da consulta</td></tr>
-      <tr><td><code>nota_fiscal</code> / <code>nota_fiscal_conhecimento</code></td><td>Notas fiscais vinculadas ao conhecimento</td></tr>
-      <tr><td><code>empresa</code></td><td>Dados da empresa embarcadora</td></tr>
-      <tr><td><code>filial_transportadora</code> / <code>transportadora</code></td><td>Transportadora e filial responsável pela entrega</td></tr>
-      <tr><td><code>localizacao</code> / <code>cidade</code></td><td>Origem e destino do frete</td></tr>
-      <tr><td><code>modal</code></td><td>Modalidade do transporte</td></tr>
-      <tr><td><code>grupo_usuario</code> / <code>grupo_usuario_contato</code></td><td>Contatos (e-mail e WhatsApp) dos responsáveis por transportadora</td></tr>
-    </table>
-    <p class="doc-p" style="margin-top:10px">MongoDB (<code>followEmails</code>) armazena cada e-mail enviado com status, tentativas, prazo e resposta. <code>followHistoricoConversa</code> guarda o histórico das conversas da Laisa.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG7.0)</div>
-    <p class="doc-p">Busca notas fiscais com previsão de entrega para o dia corrente, agrupando por transportadora e filial. Campos retornados:</p>
-    <table class="doc-table">
-      <tr><th>Campo</th><th>Significado</th></tr>
-      <tr><td><code>Número nota fiscal</code></td><td>Número da NF emitida pelo embarcador</td></tr>
-      <tr><td><code>CNPJ / Razão emissor</code></td><td>Identificação do emitente da nota</td></tr>
-      <tr><td><code>Chave acesso</code></td><td>Chave NFe para rastreio</td></tr>
-      <tr><td><code>Data emissão</code></td><td>Quando a nota foi emitida</td></tr>
-      <tr><td><code>UF origem / destino</code></td><td>Estados de saída e chegada do frete</td></tr>
-      <tr><td><code>Transportadora / CNPJ filial</code></td><td>Responsável pelo transporte e sua filial</td></tr>
-      <tr><td><code>Previsão entrega</code></td><td>Data prevista para a entrega ao destinatário</td></tr>
-      <tr><td><code>Modal</code></td><td>Tipo de transporte (rodoviário, aéreo etc.)</td></tr>
-    </table>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Equipes internas perdem horas cobrando transportadoras manualmente sobre entregas do dia. Respostas ficam perdidas na caixa de e-mail sem rastreamento.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O produto dispara cobranças em 4 momentos do dia, reforça automaticamente quem não respondeu, lê e classifica os anexos enviados pela transportadora (canhoto, ocorrência, prazo) e atualiza o TMS — tudo sem intervenção humana. O cliente tem visibilidade total do que foi cobrado, quando e qual foi a resposta.</p>
-  </div>
-</div>`;
 
-const DOC_SEM_COLETA = `<div class="doc-inner">
   <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
-    <p class="doc-p">Cobra automaticamente transportadoras que possuem documentos sem a ocorrência de coleta (ocorrência 00) registrada. Garante que o TMS reflita a realidade operacional desde a saída da mercadoria, não apenas na entrega.</p>
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático a cada 15 minutos</strong> — nenhuma ação manual é necessária para dispará-lo.</div></li>
+      <li><div class="amb-li-content">Precisa que as rotas estejam <strong>corretamente cadastradas no TMS</strong> com motorista, placa, data de partida prevista e situação atualizadas.</div></li>
+      <li><div class="amb-li-content">O motorista precisa ter o <strong>número de telefone cadastrado</strong> no TMS para receber as mensagens via WhatsApp.</div></li>
+      <li><div class="amb-li-content">As respostas do motorista chegam via <strong>webhook vinculado ao número UAZAPI</strong> fornecido pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
-    <div class="deps-box">
-      <div class="dep-item"><span class="dep-code">AG6.0</span><div class="dep-desc"><strong>Notas sem coleta</strong> — Fluxo principal. Roda <strong>uma vez por mês, no dia 5 às 07h10</strong>. Busca notas fiscais sem ocorrência de coleta registrada, envia e-mail com planilha anexa para a transportadora e consolidado interno para a equipe. Reforça via WhatsApp quando há celular cadastrado.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados sem resposta e reenvia a cobrança automaticamente após o prazo configurado.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Identifica e classifica os anexos enviados pela transportadora em resposta (EDI de coleta, ocorrência ou prazo) e atualiza o TMS.</div></div>
-    </div>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG6.0)</div>
-    <p class="doc-p">Busca documentos ativos no TMS que <strong>não possuem ocorrência 00</strong> (coleta) registrada. Campos principais:</p>
-    <table class="doc-table">
-      <tr><th>Campo</th><th>Significado</th></tr>
-      <tr><td><code>Número / Série nota fiscal</code></td><td>Identificação do documento fiscal</td></tr>
-      <tr><td><code>CNPJ / Razão emissor</code></td><td>Quem emitiu a nota</td></tr>
-      <tr><td><code>Chave acesso</code></td><td>Chave NFe para rastreio</td></tr>
-      <tr><td><code>Data emissão</code></td><td>Quando a nota foi emitida</td></tr>
-      <tr><td><code>UF origem / destino</code></td><td>Estados de saída e chegada</td></tr>
-      <tr><td><code>Transportadora / CNPJ filial</code></td><td>Responsável pela coleta que não foi registrada</td></tr>
-      <tr><td><code>Modal</code></td><td>Tipo de transporte</td></tr>
-      <tr><td><code>Previsão entrega</code></td><td>Data prevista — auxilia na priorização</td></tr>
-    </table>
-    <p class="doc-p" style="margin-top:10px">Contatos buscados via <code>grupo_usuario</code> + <code>grupo_usuario_contato</code> no PostgreSQL. Registros gravados em <span class="tag tag-mongo">MongoDB followEmails</span> e <span class="tag tag-mongo">followHistoricoConversa</span>.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Notas fiscais que saíram do embarcador mas não tiveram a coleta confirmada pela transportadora geram incerteza operacional: o cliente não sabe se a mercadoria foi coletada.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O produto roda mensalmente de forma automática, identifica exatamente quais transportadoras estão com documentos sem EDI de coleta e cobra por e-mail + WhatsApp, com planilha detalhada. A transportadora pode responder com o EDI e o sistema processa automaticamente.</p>
-  </div>
-</div>`;
 
-const DOC_EM_ATRASO = `<div class="doc-inner">
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
-    <p class="doc-p">Cobra automaticamente transportadoras sobre entregas com prazo vencido nos últimos 30 dias que ainda não foram concluídas no sistema, solicitando posição atualizada de cada documento.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
-    <div class="deps-box">
-      <div class="dep-item"><span class="dep-code">AG3.0</span><div class="dep-desc"><strong>Notas em atraso</strong> — Fluxo principal. Roda a <strong>cada 5 dias às 09h30</strong>. Busca entregas com prazo vencido nos últimos 30 dias sem confirmação de recebimento, envia e-mail com planilha + destaque do documento com maior atraso, e consolida resumo interno para a equipe.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails sem resposta e reenvia a cobrança automaticamente após o prazo configurado (máx. 3 tentativas).</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Classifica anexos recebidos (comprovante de entrega, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
-    </div>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG3.0)</div>
-    <p class="doc-p">Busca conhecimentos com <strong>todas</strong> as condições simultaneamente:</p>
-    <table class="doc-table">
-      <tr><th>Filtro</th><th>Significado</th></tr>
-      <tr><td><code>dt_emissao &gt;= hoje - 30 dias</code></td><td>Apenas entregas emitidas no último mês</td></tr>
-      <tr><td><code>dt_previsao_entrega &lt; hoje</code></td><td>Prazo de entrega já venceu</td></tr>
-      <tr><td><code>nf.dt_recebimento IS NULL</code></td><td>Nota ainda não foi recebida/confirmada no destino</td></tr>
-      <tr><td><code>nf.situacao = 2</code></td><td>Nota fiscal ativa no sistema</td></tr>
-      <tr><td><code>NOT EXISTS evento_ocorrencia</code></td><td>Sem ocorrência de entrega registrada — confirma que está em aberto</td></tr>
-    </table>
-    <p class="doc-p" style="margin-top:10px">Campos retornados: NF, CNPJ/razão emissor, chave acesso, data emissão, UF origem/destino, transportadora/filial, modal e previsão de entrega.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Entregas em atraso que ficam sem posicionamento prejudicam o cliente final e geram reclamações. A equipe interna perde tempo rastreando manualmente cada ocorrência.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O produto roda a cada 5 dias, identifica automaticamente todos os documentos atrasados por transportadora, destaca o de maior atraso no e-mail para gerar urgência, e já dispara cobrança diretamente para o contato responsável. O cliente tem visibilidade total com o consolidado interno gerado automaticamente.</p>
-  </div>
-</div>`;
-
-const DOC_SEM_CANHOTO = `<div class="doc-inner">
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
-    <p class="doc-p">Cobra automaticamente transportadoras que possuem entregas realizadas mas ainda não enviaram o comprovante de entrega (canhoto). Notifica também a equipe interna com um resumo consolidado de todos os canhotos pendentes.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
-    <div class="deps-box">
-      <div class="dep-item"><span class="dep-code">AG4.0</span><div class="dep-desc"><strong>Canhoto</strong> — Fluxo principal. Roda <strong>toda segunda-feira às 07h</strong>. Busca entregas realizadas nos últimos 30 dias com ocorrência de entrega (entreganota ou finalizartransporte) mas sem anexo de canhoto. Envia e-mail com planilha para a transportadora e resumo consolidado para o embarcador.</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica quais cobranças ainda não tiveram resposta e reenvia automaticamente (máx. 3 tentativas).</div></div>
-      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Quando a transportadora responde com o canhoto em anexo, a IA identifica, extrai os dados e registra o comprovante no TMS automaticamente.</div></div>
-    </div>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG4.0)</div>
-    <p class="doc-p">Busca entregas com <strong>ocorrência de entrega registrada mas sem anexo de canhoto</strong>:</p>
-    <table class="doc-table">
-      <tr><th>Tabela / Filtro</th><th>Significado</th></tr>
-      <tr><td><code>evento_ocorrencia</code></td><td>Eventos de entrega registrados no TMS</td></tr>
-      <tr><td><code>ocorrencia_acao_ocorrencia</code></td><td>Tipo de ação: <code>entreganota</code> ou <code>finalizartransporte</code> — confirma que houve entrega</td></tr>
-      <tr><td><code>evento_ocorrencia_anexo</code></td><td>Tabela de anexos — filtro <code>eoa.anexo IS NULL</code> identifica quem não enviou o canhoto</td></tr>
-      <tr><td><code>dt_emissao &gt;= hoje - 30 dias</code></td><td>Janela de 30 dias para evitar reprocessar canhotos muito antigos</td></tr>
-    </table>
-    <p class="doc-p" style="margin-top:10px">Campos adicionais retornados: NF, CNPJ/razão emissor, chave acesso, transportadora/filial, data da ocorrência de entrega, tipo e código da ocorrência, observação do evento.</p>
-  </div>
-  <div class="doc-divider"></div>
-  <div class="doc-block">
-    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Canhotos são documentos legais que comprovam a entrega. Sem eles, o embarcador não tem evidência jurídica da conclusão do frete — o que pode gerar disputas com clientes e seguradoras.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O produto roda semanalmente (toda segunda), identifica todos os canhotos pendentes por transportadora, cobra via e-mail com planilha e envia resumo ao cliente com o que foi cobrado. Quando a transportadora responde com o arquivo, o sistema lê, valida e registra no TMS automaticamente — zero trabalho manual.</p>
-  </div>
 </div>`;
 
 const DOC_TEMPERATURA = `<div class="doc-inner">
@@ -415,7 +314,19 @@ const DOC_TEMPERATURA = `<div class="doc-inner">
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Veículos refrigerados com temperatura fora do range correto podem causar perda de carga, multas sanitárias e reclamações de clientes. Sem monitoramento ativo, o problema só é descoberto na entrega — tarde demais.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O fluxo atua como um fiscal de temperatura 24/7, detectando anomalias em até 10 minutos e acionando o próprio motorista para verificar e reportar. A IA entende texto, áudio e foto, então o motorista não precisa digitar nada — pode falar ou tirar uma foto do painel. Toda a cadeia de eventos (alerta, resposta, decisão) é rastreada e auditável. Se o problema persistir, a equipe da Torre é acionada automaticamente.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O fluxo atua como um fiscal de temperatura 24/7, detectando anomalias em até 10 minutos e acionando o próprio motorista para verificar e reportar. A IA entende texto, áudio e foto. Se o problema persistir, a equipe da Torre é acionada automaticamente.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático a cada 10 minutos</strong> entre 05h e 19h — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que o sistema de telemetria esteja <strong>populando a tabela <code>TB_HISTORICO_TEMPERATURA_ROTA</code></strong> com leituras periódicas de temperatura dos veículos refrigerados.</div></li>
+      <li><div class="amb-li-content">As <strong>placas dos veículos monitorados</strong> precisam estar configuradas no fluxo — o time de desenvolvimento configura a lista por cliente.</div></li>
+      <li><div class="amb-li-content">As respostas do motorista (texto, áudio ou foto) chegam via <strong>webhook vinculado ao número UAZAPI</strong> fornecido pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -467,7 +378,18 @@ const DOC_INICIO_ROTA = `<div class="doc-inner">
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Motoristas que não iniciam a rota no horário previsto geram atraso em cadeia nas entregas, impactando SLA do cliente final e distorcendo os indicadores de pontualidade.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O fluxo age automaticamente assim que o horário de partida vence, sem precisar de nenhuma intervenção da torre. A Laisa fala com o motorista pelo WhatsApp — por texto ou áudio — de forma natural, como se fosse um operador humano. Tudo rastreado e auditável.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O fluxo age automaticamente assim que o horário de partida vence. A Laisa fala com o motorista pelo WhatsApp — por texto ou áudio — de forma natural. Tudo rastreado e auditável.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo é <strong>disparado por outro workflow</strong> (trigger externo) — não possui agendamento próprio. O time de desenvolvimento configura qual workflow o aciona.</div></li>
+      <li><div class="amb-li-content">Precisa que as rotas estejam <strong>cadastradas no TMS</strong> com horário de partida prevista (<code>DtPartidaPrevista</code>) definido e motorista com telefone vinculado.</div></li>
+      <li><div class="amb-li-content">As respostas do motorista chegam via <strong>webhook vinculado ao número UAZAPI</strong> fornecido pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -543,7 +465,18 @@ const DOC_SEQUENCIA = `<div class="doc-inner">
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Motoristas que desviam da rota planejada geram mais km rodado, atrasos em clientes subsequentes e distorção nos KPIs de roteirização. Desvios sem justificativa registrada impedem análise de melhoria e responsabilização.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O produto cobre todo o ciclo — notifica em tempo real durante a rota e garante que nenhum desvio fique sem resposta mesmo após a viagem encerrar. A IA questiona, entende a justificativa, registra e escala automaticamente. O cliente tem rastreabilidade completa de cada ocorrência, com causa registrada e auditável.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto cobre todo o ciclo — notifica em tempo real durante a rota e garante que nenhum desvio fique sem resposta mesmo após a viagem encerrar. O cliente tem rastreabilidade completa de cada ocorrência, com causa registrada e auditável.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">Ambos os fluxos rodam por <strong>agendamento automático a cada hora</strong> entre 05h e 19h — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">O roteirizador precisa estar <strong>populando os campos de sequência</strong> (<code>IdSequencia</code> e <code>IdSequenciaRealizada</code>) na tabela <code>TB_ENTREGA</code> do TMS — sem esses dados, o fluxo não detecta divergências.</div></li>
+      <li><div class="amb-li-content">As respostas do motorista chegam via <strong>webhook vinculado ao número UAZAPI</strong> fornecido pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -584,6 +517,17 @@ const DOC_ENTREGA_ATRASADA = `<div class="doc-inner">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Desvios de sequência que não são justificados ficam sem registro de causa, impossibilitando análise de melhoria de roteirização e responsabilização do motorista.</p>
     <p class="doc-p"><strong>Como vender:</strong> O fluxo garante que nenhum desvio de rota fique sem resposta — mesmo após a viagem encerrada. Reencaminha automaticamente até 3 vezes e escala para a Torre se necessário. O cliente tem rastreabilidade completa de cada ocorrência, com causa registrada e auditável.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático a cada hora</strong> entre 05h e 19h — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que o fluxo de <strong>Análise de Sequência em Andamento esteja ativo</strong> — é ele que cria os tratamentos de sequência divergente que este fluxo processa no pós-rota.</div></li>
+      <li><div class="amb-li-content">As respostas do motorista chegam via <strong>webhook vinculado ao número UAZAPI</strong> fornecido pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -629,6 +573,7 @@ const DOC_ENTREGA_AGENDADA = `<div class="doc-inner">
       <tr><td><code>NOT EXISTS TB_TRATAMENTO_EVENTO</code></td><td>Idempotência — evita cobrar duas vezes a mesma entrega</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Cadência de mensagens — 4 templates progressivos</div>
@@ -642,11 +587,241 @@ const DOC_ENTREGA_AGENDADA = `<div class="doc-inner">
     </table>
     <p class="doc-p" style="margin-top:8px">Após 4 notificações (<code>QtdNotificacao = 4</code>), o fluxo para de cobrar aquela entrega.</p>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Entregas realizadas mas não apontadas no sistema geram divergências nos relatórios, cobranças indevidas de re-entrega e insatisfação do cliente final que não recebe atualização de status.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O fluxo age a cada 15 minutos, com mensagens progressivas via canal oficial WhatsApp Business (GUPSHUP). Todos os parâmetros — tolerância, janela de busca, intervalo de recobrança — são configuráveis por cliente. É um produto replicável para qualquer empresa com operação de entrega, independente do porte.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O fluxo age a cada 15 minutos com mensagens progressivas via canal oficial WhatsApp Business. Todos os parâmetros — tolerância, janela de busca, intervalo de recobrança — são configuráveis por cliente. É replicável para qualquer empresa com operação de entrega.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>dois agendamentos automáticos a cada 15 minutos</strong> — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as entregas estejam <strong>cadastradas no TMS com ETA definido</strong> (<code>DtPrevistaETA</code>) — sem essa informação, o fluxo não identifica entregas pendentes.</div></li>
+      <li><div class="amb-li-content">O motorista precisa ter o <strong>número de telefone cadastrado</strong> no TMS para receber as mensagens.</div></li>
+      <li><div class="amb-li-content">Utiliza <strong>templates GUPSHUP</strong> (WhatsApp Business oficial) — o time de desenvolvimento configura os templates aprovados pela Meta antes da ativação.</div></li>
+    </ul>
+  </div>
+</div>`;
+
+const DOC_ENTREGAS_DIA = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
+    <p class="doc-p">Automatiza o acompanhamento diário de entregas previstas, cobrando as transportadoras sobre documentos em aberto ao longo do dia e realizando o fechamento ao final. Elimina a necessidade de cobrança manual pela equipe interna.</p>
+  </div>
+
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
+    <div class="deps-box">
+      <div class="dep-item"><span class="dep-code">AG7.0</span><div class="dep-desc"><strong>Entregas do dia</strong> — Fluxo principal. Roda em 4 horários fixos: <strong>08h, 12h, 18h e 23h30</strong>. Consulta notas fiscais com previsão de entrega para o dia, gera planilha por transportadora/filial e envia e-mail de cobrança + WhatsApp via Laisa. Registra cada envio no MongoDB com ID rastreável embutido no e-mail.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados há mais de 3 dias sem resposta e com menos de 3 tentativas. Checa a caixa Gmail da Laisa; se não houve retorno, reenvia a cobrança automaticamente.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail a cada minuto. Identifica respostas das transportadoras pelo ID embutido no e-mail, aciona IA para classificar o anexo recebido (canhoto, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
+    </div>
+  </div>
+
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Banco de dados (AG7.0)</div>
+    <p class="doc-p">Banco PostgreSQL do TMS da empresa. Tabelas principais consultadas:</p>
+    <table class="doc-table">
+      <tr><th>Tabela</th><th>Para que serve</th></tr>
+      <tr><td><code>conhecimento</code></td><td>Conhecimentos de transporte — base principal da consulta</td></tr>
+      <tr><td><code>nota_fiscal</code> / <code>nota_fiscal_conhecimento</code></td><td>Notas fiscais vinculadas ao conhecimento</td></tr>
+      <tr><td><code>empresa</code></td><td>Dados da empresa embarcadora</td></tr>
+      <tr><td><code>filial_transportadora</code> / <code>transportadora</code></td><td>Transportadora e filial responsável pela entrega</td></tr>
+      <tr><td><code>localizacao</code> / <code>cidade</code></td><td>Origem e destino do frete</td></tr>
+      <tr><td><code>modal</code></td><td>Modalidade do transporte</td></tr>
+      <tr><td><code>grupo_usuario</code> / <code>grupo_usuario_contato</code></td><td>Contatos (e-mail e WhatsApp) dos responsáveis por transportadora</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:10px">MongoDB (<code>followEmails</code>) armazena cada e-mail enviado com status, tentativas, prazo e resposta. <code>followHistoricoConversa</code> guarda o histórico das conversas da Laisa.</p>
+  </div>
+
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG7.0)</div>
+    <p class="doc-p">Busca notas fiscais com previsão de entrega para o dia corrente, agrupando por transportadora e filial. Campos retornados:</p>
+    <table class="doc-table">
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>Número nota fiscal</code></td><td>Número da NF emitida pelo embarcador</td></tr>
+      <tr><td><code>CNPJ / Razão emissor</code></td><td>Identificação do emitente da nota</td></tr>
+      <tr><td><code>Chave acesso</code></td><td>Chave NFe para rastreio</td></tr>
+      <tr><td><code>Data emissão</code></td><td>Quando a nota foi emitida</td></tr>
+      <tr><td><code>UF origem / destino</code></td><td>Estados de saída e chegada do frete</td></tr>
+      <tr><td><code>Transportadora / CNPJ filial</code></td><td>Responsável pelo transporte e sua filial</td></tr>
+      <tr><td><code>Previsão entrega</code></td><td>Data prevista para a entrega ao destinatário</td></tr>
+      <tr><td><code>Modal</code></td><td>Tipo de transporte (rodoviário, aéreo etc.)</td></tr>
+    </table>
+  </div>
+
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Equipes internas perdem horas cobrando transportadoras manualmente sobre entregas do dia. Respostas ficam perdidas na caixa de e-mail sem rastreamento.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto dispara cobranças em 4 momentos do dia, reforça automaticamente quem não respondeu, lê e classifica os anexos enviados pela transportadora (canhoto, ocorrência, prazo) e atualiza o TMS — tudo sem intervenção humana. O cliente tem visibilidade total do que foi cobrado, quando e qual foi a resposta.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_GRUPO_USUARIO}
+
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo principal (AG7.0) roda por <strong>agendamento automático em 4 horários fixos</strong>: 08h, 12h, 18h e 23h30 — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as notas fiscais estejam <strong>cadastradas no TMS com previsão de entrega para o dia</strong> e transportadora vinculada.</div></li>
+      <li><div class="amb-li-content">O <strong>Grupo de Usuário</strong> no TMS precisa estar populado com os e-mails e telefones dos responsáveis por transportadora — é através dele que o fluxo sabe para quem enviar as cobranças.</div></li>
+      <li><div class="amb-li-content">O AG5.2 é ativado por <strong>trigger do Gmail</strong> — a caixa de e-mail da Laisa precisa estar conectada e o trigger configurado pelo time de desenvolvimento.</div></li>
+    </ul>
+  </div>
+
+</div>`;
+
+const DOC_SEM_COLETA = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
+    <p class="doc-p">Cobra automaticamente transportadoras que possuem documentos sem a ocorrência de coleta (ocorrência 00) registrada. Garante que o TMS reflita a realidade operacional desde a saída da mercadoria, não apenas na entrega.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
+    <div class="deps-box">
+      <div class="dep-item"><span class="dep-code">AG6.0</span><div class="dep-desc"><strong>Notas sem coleta</strong> — Fluxo principal. Roda <strong>uma vez por mês, no dia 5 às 07h10</strong>. Busca notas fiscais sem ocorrência de coleta registrada, envia e-mail com planilha anexa para a transportadora e consolidado interno para a equipe. Reforça via WhatsApp quando há celular cadastrado.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails enviados sem resposta e reenvia a cobrança automaticamente após o prazo configurado.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Identifica e classifica os anexos enviados pela transportadora em resposta (EDI de coleta, ocorrência ou prazo) e atualiza o TMS.</div></div>
+    </div>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG6.0)</div>
+    <p class="doc-p">Busca documentos ativos no TMS que <strong>não possuem ocorrência 00</strong> (coleta) registrada. Campos principais:</p>
+    <table class="doc-table">
+      <tr><th>Campo</th><th>Significado</th></tr>
+      <tr><td><code>Número / Série nota fiscal</code></td><td>Identificação do documento fiscal</td></tr>
+      <tr><td><code>CNPJ / Razão emissor</code></td><td>Quem emitiu a nota</td></tr>
+      <tr><td><code>Chave acesso</code></td><td>Chave NFe para rastreio</td></tr>
+      <tr><td><code>Data emissão</code></td><td>Quando a nota foi emitida</td></tr>
+      <tr><td><code>UF origem / destino</code></td><td>Estados de saída e chegada</td></tr>
+      <tr><td><code>Transportadora / CNPJ filial</code></td><td>Responsável pela coleta que não foi registrada</td></tr>
+      <tr><td><code>Modal</code></td><td>Tipo de transporte</td></tr>
+      <tr><td><code>Previsão entrega</code></td><td>Data prevista — auxilia na priorização</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:10px">Contatos buscados via <code>grupo_usuario</code> + <code>grupo_usuario_contato</code> no PostgreSQL. Registros gravados em <span class="tag tag-mongo">MongoDB followEmails</span> e <span class="tag tag-mongo">followHistoricoConversa</span>.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Notas fiscais que saíram do embarcador mas não tiveram a coleta confirmada pela transportadora geram incerteza operacional — o cliente não sabe se a mercadoria foi coletada.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto roda mensalmente de forma automática, identifica quais transportadoras estão com documentos sem EDI de coleta e cobra por e-mail + WhatsApp com planilha detalhada. A transportadora pode responder com o EDI e o sistema processa automaticamente.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_GRUPO_USUARIO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático uma vez por mês, no dia 5 às 07h10</strong> — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as notas fiscais estejam no TMS <strong>sem a ocorrência de coleta (código 00) registrada</strong> — o fluxo identifica automaticamente quais transportadoras não enviaram o EDI.</div></li>
+      <li><div class="amb-li-content">O <strong>Grupo de Usuário</strong> no TMS precisa estar populado com os e-mails e telefones dos responsáveis por transportadora.</div></li>
+      <li><div class="amb-li-content">O AG5.2 é ativado por <strong>trigger do Gmail</strong> — a caixa de e-mail da Laisa precisa estar conectada e o trigger configurado pelo time de desenvolvimento.</div></li>
+    </ul>
+  </div>
+</div>`;
+
+const DOC_EM_ATRASO = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
+    <p class="doc-p">Cobra automaticamente transportadoras sobre entregas com prazo vencido nos últimos 30 dias que ainda não foram concluídas no sistema, solicitando posição atualizada de cada documento.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
+    <div class="deps-box">
+      <div class="dep-item"><span class="dep-code">AG3.0</span><div class="dep-desc"><strong>Notas em atraso</strong> — Fluxo principal. Roda a <strong>cada 5 dias às 09h30</strong>. Busca entregas com prazo vencido nos últimos 30 dias sem confirmação de recebimento, envia e-mail com planilha + destaque do documento com maior atraso, e consolida resumo interno para a equipe.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica e-mails sem resposta e reenvia a cobrança automaticamente após o prazo configurado (máx. 3 tentativas).</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Classifica anexos recebidos (comprovante de entrega, ocorrência de atraso ou tabela de prazo) e atualiza o TMS automaticamente.</div></div>
+    </div>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG3.0)</div>
+    <p class="doc-p">Busca conhecimentos com <strong>todas</strong> as condições simultaneamente:</p>
+    <table class="doc-table">
+      <tr><th>Filtro</th><th>Significado</th></tr>
+      <tr><td><code>dt_emissao &gt;= hoje - 30 dias</code></td><td>Apenas entregas emitidas no último mês</td></tr>
+      <tr><td><code>dt_previsao_entrega &lt; hoje</code></td><td>Prazo de entrega já venceu</td></tr>
+      <tr><td><code>nf.dt_recebimento IS NULL</code></td><td>Nota ainda não foi recebida/confirmada no destino</td></tr>
+      <tr><td><code>nf.situacao = 2</code></td><td>Nota fiscal ativa no sistema</td></tr>
+      <tr><td><code>NOT EXISTS evento_ocorrencia</code></td><td>Sem ocorrência de entrega registrada — confirma que está em aberto</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:10px">Campos retornados: NF, CNPJ/razão emissor, chave acesso, data emissão, UF origem/destino, transportadora/filial, modal e previsão de entrega.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Entregas em atraso que ficam sem posicionamento prejudicam o cliente final e geram reclamações. A equipe interna perde tempo rastreando manualmente cada ocorrência.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto roda a cada 5 dias, identifica todos os documentos atrasados por transportadora, destaca o de maior atraso no e-mail para gerar urgência, e já dispara cobrança diretamente para o contato responsável.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_GRUPO_USUARIO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático a cada 5 dias às 09h30</strong> — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as notas fiscais estejam no TMS com <strong>previsão de entrega (<code>dt_previsao_entrega</code>) definida</strong> — sem esse campo preenchido, o fluxo não identifica atrasos.</div></li>
+      <li><div class="amb-li-content">O <strong>Grupo de Usuário</strong> no TMS precisa estar populado com os e-mails e telefones dos responsáveis por transportadora.</div></li>
+      <li><div class="amb-li-content">O AG5.2 é ativado por <strong>trigger do Gmail</strong> — a caixa de e-mail da Laisa precisa estar conectada e o trigger configurado pelo time de desenvolvimento.</div></li>
+    </ul>
+  </div>
+</div>`;
+
+const DOC_SEM_CANHOTO = `<div class="doc-inner">
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Objetivo do produto</div>
+    <p class="doc-p">Cobra automaticamente transportadoras que possuem entregas realizadas mas ainda não enviaram o comprovante de entrega (canhoto). Notifica também a equipe interna com um resumo consolidado de todos os canhotos pendentes.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>Fluxos que compõem este produto</div>
+    <div class="deps-box">
+      <div class="dep-item"><span class="dep-code">AG4.0</span><div class="dep-desc"><strong>Canhoto</strong> — Fluxo principal. Roda <strong>toda segunda-feira às 07h</strong>. Busca entregas realizadas nos últimos 30 dias com ocorrência de entrega (entreganota ou finalizartransporte) mas sem anexo de canhoto. Envia e-mail com planilha para a transportadora e resumo consolidado para o embarcador.</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.0</span><div class="dep-desc"><strong>Followup email</strong> — Roda a cada hora. Verifica quais cobranças ainda não tiveram resposta e reenvia automaticamente (máx. 3 tentativas).</div></div>
+      <div class="dep-item"><span class="dep-code">AG5.2</span><div class="dep-desc"><strong>Processamento de arquivos</strong> — Ativado por trigger do Gmail. Quando a transportadora responde com o canhoto em anexo, a IA identifica, extrai os dados e registra o comprovante no TMS automaticamente.</div></div>
+    </div>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal (AG4.0)</div>
+    <p class="doc-p">Busca entregas com <strong>ocorrência de entrega registrada mas sem anexo de canhoto</strong>:</p>
+    <table class="doc-table">
+      <tr><th>Tabela / Filtro</th><th>Significado</th></tr>
+      <tr><td><code>evento_ocorrencia</code></td><td>Eventos de entrega registrados no TMS</td></tr>
+      <tr><td><code>ocorrencia_acao_ocorrencia</code></td><td>Tipo de ação: <code>entreganota</code> ou <code>finalizartransporte</code> — confirma que houve entrega</td></tr>
+      <tr><td><code>evento_ocorrencia_anexo</code></td><td>Tabela de anexos — filtro <code>eoa.anexo IS NULL</code> identifica quem não enviou o canhoto</td></tr>
+      <tr><td><code>dt_emissao &gt;= hoje - 30 dias</code></td><td>Janela de 30 dias para evitar reprocessar canhotos muito antigos</td></tr>
+    </table>
+    <p class="doc-p" style="margin-top:10px">Campos adicionais retornados: NF, CNPJ/razão emissor, chave acesso, transportadora/filial, data da ocorrência de entrega, tipo e código da ocorrência, observação do evento.</p>
+  </div>
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Canhotos são documentos legais que comprovam a entrega. Sem eles, o embarcador não tem evidência jurídica da conclusão do frete.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O produto roda semanalmente, identifica todos os canhotos pendentes por transportadora e cobra via e-mail com planilha. Quando a transportadora responde com o arquivo, o sistema lê, valida e registra no TMS automaticamente — zero trabalho manual.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_GRUPO_USUARIO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático toda segunda-feira às 07h</strong> — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as entregas estejam com <strong>ocorrência de entrega registrada</strong> no TMS (<code>entreganota</code> ou <code>finalizartransporte</code>) para que o fluxo identifique quem não enviou o canhoto.</div></li>
+      <li><div class="amb-li-content">O <strong>Grupo de Usuário</strong> no TMS precisa estar populado com os e-mails e telefones dos responsáveis por transportadora.</div></li>
+      <li><div class="amb-li-content">O AG5.2 é ativado por <strong>trigger do Gmail</strong> — a caixa de e-mail da Laisa precisa estar conectada e o trigger configurado pelo time de desenvolvimento.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -656,6 +831,7 @@ const DOC_DEPARA = `<div class="doc-inner">
     <p class="doc-p">O fluxo <strong>De/Para Ocorrência AG1.0</strong> resolve um problema clássico de integração: transportadoras enviam ocorrências com seus próprios códigos internos (código 99 — genérico), mas o TMS do embarcador precisa dos códigos padronizados da empresa. A IA analisa a observação livre enviada pela transportadora, sugere o código correto do embarcador, e aguarda aprovação humana antes de gravar no banco.</p>
     <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, e-mails de aprovação e parâmetros de contato variam por cliente implantado.</p>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Agendamento e banco de dados</div>
@@ -672,6 +848,7 @@ const DOC_DEPARA = `<div class="doc-inner">
       <tr><td><span class="tag tag-mongo">MongoDB deParaOcorrencia</span></td><td>Gerencia o estado de cada aprovação: <code>pending</code> · <code>approved</code> · <code>rejected</code> · <code>expired</code></td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Consulta principal</div>
@@ -686,24 +863,38 @@ const DOC_DEPARA = `<div class="doc-inner">
       <tr><td><code>nm_empresa</code></td><td>Empresa embarcadora associada ao evento</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Fluxo de aprovação humana</div>
     <ol class="step-list">
-      <li>IA analisa a <code>observacao</code> da transportadora e consulta o catálogo de ocorrências do embarcador (<code>PostgressOcorrEmpresa</code>) para sugerir o <code>deParaCodigo</code></li>
-      <li>Fluxo gera uma <strong>página web de aprovação</strong> com os detalhes do De/Para sugerido</li>
-      <li>E-mail é enviado ao responsável do embarcador com link para a página — ele clica em <strong>Deferir</strong> ou <strong>Indeferir</strong></li>
-      <li>Resposta é registrada no MongoDB (<code>status: approved/rejected</code>, <code>decidedAt</code>, <code>decidedBy</code>)</li>
-      <li>Se <strong>aprovado</strong>: faz INSERT na tabela <code>ocorrencia</code> do TMS criando o De/Para oficial vinculado à transportadora</li>
-      <li>Transportadora é notificada por e-mail com os códigos melhorados</li>
-      <li>Itens sem resposta dentro do prazo são expirados automaticamente pelo scheduler horário</li>
+      <li>A IA analisa a observação da transportadora e consulta o catálogo de ocorrências do embarcador para sugerir o código De/Para correto.</li>
+      <li>O fluxo gera uma <strong>página web de aprovação</strong> com os detalhes do De/Para sugerido.</li>
+      <li>Um e-mail é enviado ao responsável do embarcador com o link para a página — ele clica em <strong>Deferir</strong> ou <strong>Indeferir</strong>.</li>
+      <li>A resposta é registrada no MongoDB com status <code>approved</code> ou <code>rejected</code>, data e responsável pela decisão.</li>
+      <li>Se <strong>aprovado</strong>: o sistema faz um INSERT na tabela de ocorrências do TMS, criando o De/Para oficial vinculado à transportadora.</li>
+      <li>A transportadora é notificada por e-mail com os novos códigos padronizados.</li>
+      <li>Itens sem resposta dentro do prazo são expirados automaticamente pelo scheduler horário.</li>
     </ol>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Transportadoras usam códigos próprios que não existem no TMS do embarcador, gerando ocorrências genéricas sem valor analítico. A equipe precisa interpretar manualmente cada observação para saber o que realmente aconteceu com a entrega.</p>
-    <p class="doc-p"><strong>Como vender:</strong> O fluxo usa IA para interpretar o texto livre da transportadora e já sugerir o código correto — o embarcador apenas aprova ou rejeita com um clique no e-mail. Após aprovado, o De/Para é gravado no TMS e a transportadora recebe o feedback automaticamente. Resultado: qualidade dos dados de ocorrência aumenta progressivamente sem esforço manual.</p>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Transportadoras usam códigos próprios que não existem no TMS do embarcador, gerando ocorrências genéricas sem valor analítico. A equipe precisa interpretar manualmente cada observação.</p>
+    <p class="doc-p"><strong>Como vender:</strong> O fluxo usa IA para interpretar o texto livre da transportadora e sugerir o código correto — o embarcador apenas aprova ou rejeita com um clique no e-mail. Após aprovado, o De/Para é gravado no TMS e a transportadora recebe o feedback automaticamente.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_GRUPO_USUARIO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo roda por <strong>agendamento automático toda segunda-feira às 07h15</strong> — nenhuma ação manual necessária.</div></li>
+      <li><div class="amb-li-content">Precisa que as transportadoras estejam <strong>enviando eventos com ocorrência código 99</strong> (genérica) no TMS — sem essa ocorrência registrada, o fluxo não tem o que processar.</div></li>
+      <li><div class="amb-li-content">O <strong>Grupo de Usuário</strong> no TMS precisa ter os e-mails dos responsáveis — é para eles que o fluxo envia o link de aprovação do De/Para.</div></li>
+      <li><div class="amb-li-content">O fluxo gera uma <strong>página web de aprovação</strong> acessada pelo link enviado no e-mail — o time de desenvolvimento disponibiliza a URL antes da ativação.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -713,6 +904,7 @@ const DOC_REP_VENDEDOR = `<div class="doc-inner">
     <p class="doc-p">O fluxo <strong>Representante/Vendedor</strong> é um assistente conversacional exclusivo para representantes e vendedores do embarcador. Via WhatsApp, eles conseguem rastrear entregas, cotar fretes e obter a DANFE de uma nota fiscal — tudo autenticado e sem precisar acessar o TMS diretamente.</p>
     <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, coleções MongoDB e credenciais UAZAPI variam por cliente implantado.</p>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Ativação e banco de dados</div>
@@ -726,6 +918,7 @@ const DOC_REP_VENDEDOR = `<div class="doc-inner">
       <tr><td><span class="tag tag-mongo">repBuffer</span></td><td>Buffer anti-duplicata: armazena mensagens por <code>IdConversa</code> para deduplicação</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Sistema de autenticação</div>
@@ -737,6 +930,7 @@ const DOC_REP_VENDEDOR = `<div class="doc-inner">
       <tr><td>Contexto separado</td><td>Memória de autenticação isolada da memória de atendimento — evita contaminação de contexto</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Menu de funcionalidades</div>
@@ -750,11 +944,23 @@ const DOC_REP_VENDEDOR = `<div class="doc-inner">
     </table>
     <p class="doc-p" style="margin-top:8px">Aceita <strong>texto e áudio</strong> — áudio transcrito automaticamente via <strong>Groq Whisper large-v3</strong>.</p>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
-    <p class="doc-p"><strong>Problema que resolve:</strong> Representantes e vendedores precisam constantemente consultar status de entrega e emitir DANFE para clientes — hoje fazem isso ligando para a operação ou acessando o TMS, gerando retrabalho e dependência.</p>
-    <p class="doc-p"><strong>Como vender:</strong> Canal exclusivo e autenticado no WhatsApp — o representante rastreia, cota e obtém documentos fiscais sem sair do celular. A Laisa atende em texto ou áudio, com memória de contexto de até 30 mensagens. Tudo rastreado e seguro por autenticação por NF.</p>
+    <p class="doc-p"><strong>Problema que resolve:</strong> Representantes e vendedores precisam constantemente consultar status de entrega e emitir DANFE — hoje fazem isso ligando para a operação ou acessando o TMS, gerando retrabalho e dependência.</p>
+    <p class="doc-p"><strong>Como vender:</strong> Canal exclusivo e autenticado no WhatsApp. O representante rastreia, cota e obtém documentos fiscais sem sair do celular. A Laisa atende em texto ou áudio, com memória de contexto de até 30 mensagens. Tudo rastreado e seguro.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo é ativado quando o representante ou vendedor <strong>envia uma mensagem para o número UAZAPI</strong> fornecido pelo time de desenvolvimento — sem enviar a primeira mensagem, nada acontece.</div></li>
+      <li><div class="amb-li-content">O representante precisa ter acesso a uma <strong>nota fiscal válida</strong> do cliente (número + série + CNPJ) para se autenticar no sistema antes de usar qualquer funcionalidade.</div></li>
+      <li><div class="amb-li-content">As notas fiscais e dados de rastreio precisam estar <strong>atualizados no TMS</strong> — o fluxo consulta diretamente a API do TMS para responder as consultas.</div></li>
+    </ul>
   </div>
 </div>`;
 
@@ -764,6 +970,7 @@ const DOC_RASTREIO_CLIENTE = `<div class="doc-inner">
     <p class="doc-p">O fluxo <strong>Rastreio Cliente — API Oficial</strong> notifica automaticamente o <strong>cliente destinatário</strong> via WhatsApp Business sempre que uma nova ocorrência é registrada na nota fiscal dele no TMS — sem que ele precise perguntar nada. É o rastreio proativo da entrega direto no celular do cliente.</p>
     <p class="doc-p"><strong>Atenção:</strong> <code>oid_empresa</code>, número WhatsApp Business, tokens GUPSHUP e UAZAPI variam por cliente implantado.</p>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>Ativação e banco de dados</div>
@@ -776,6 +983,7 @@ const DOC_RASTREIO_CLIENTE = `<div class="doc-inner">
       <tr><td>Oracle Object Storage</td><td>Armazenamento temporário do PDF da DANFE quando o cliente solicita — arquivo deletado após envio</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>Filtros antes do envio</div>
@@ -789,6 +997,7 @@ const DOC_RASTREIO_CLIENTE = `<div class="doc-inner">
       <tr><td>Ocorrência com mais de 1 dia</td><td>Ocorrências antigas são ignoradas — evita spam de notificações retroativas</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Templates e interações com o cliente</div>
@@ -808,12 +1017,26 @@ const DOC_RASTREIO_CLIENTE = `<div class="doc-inner">
       <tr><td>NPS (após entrega)</td><td>Cliente avalia a experiência — nota gravada na tabela <code>entrega_nps</code> do PostgreSQL</td></tr>
     </table>
   </div>
+
   <div class="doc-divider"></div>
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Clientes ligam para o embarcador pedindo posição da entrega porque não recebem nenhuma comunicação proativa. Isso consome tempo da equipe de atendimento e gera insatisfação.</p>
     <p class="doc-p"><strong>Como vender:</strong> A cada ocorrência no TMS, o cliente recebe automaticamente uma mensagem via WhatsApp Business oficial com o status, link de rastreio e opção de visualizar a DANFE. Após a entrega, ainda coleta NPS automaticamente. Tudo rastreado no banco — o cliente tem visibilidade total da jornada de entrega sem precisar ligar para ninguém.</p>
   </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_RASTREIO}
+
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo é ativado quando o <strong>TMS dispara o webhook</strong> ao registrar uma nova ocorrência em uma nota fiscal — o time de desenvolvimento precisa criar e passar esse webhook para o time de comercial. No TMS, quem faz a <strong>vinculação das ocorrências ao webhook é o time de comercial</strong>.</div></li>
+      <li><div class="amb-li-content">O destinatário precisa ter o <strong>número de celular cadastrado no TMS</strong> — sem ele, o fluxo não consegue enviar a notificação.</div></li>
+      <li><div class="amb-li-content">Utiliza <strong>templates GUPSHUP</strong> (WhatsApp Business oficial).</div></li>
+      <li><div class="amb-li-content">Para o envio da DANFE, o time de desenvolvimento configura o acesso ao <strong>Oracle Object Storage</strong> para armazenamento temporário do PDF.</div></li>
+    </ul>
+  </div>
+
 </div>`;
 
 const DOC_PROCESSADOR_CANHOTO = `<div class="doc-inner">
@@ -864,13 +1087,22 @@ const DOC_PROCESSADOR_CANHOTO = `<div class="doc-inner">
   <div class="doc-block">
     <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Valor para o time comercial</div>
     <p class="doc-p"><strong>Problema que resolve:</strong> Transportadoras precisam enviar canhotos por e-mail, o que gera atraso, perda de arquivos e retrabalho para a equipe que precisa identificar qual NF cada canhoto corresponde.</p>
-    <p class="doc-p"><strong>Como vender:</strong> A transportadora envia a foto do canhoto direto pelo WhatsApp — a IA lê, valida contra o TMS e registra automaticamente. Sem e-mail, sem planilha, sem identificação manual. O representante da transportadora é cadastrado automaticamente no primeiro acesso e reconhecido nos envios seguintes. Todo o histórico de conversas é rastreado e auditável.</p>
+    <p class="doc-p"><strong>Como vender:</strong> A transportadora envia a foto do canhoto direto pelo WhatsApp — a IA lê, valida contra o TMS e registra automaticamente. Sem e-mail, sem planilha, sem identificação manual. O representante é cadastrado no primeiro acesso e reconhecido nos envios seguintes.</p>
+  </div>
+  <div class="doc-divider"></div>
+  ${PREREQ_PADRAO}
+  <div class="doc-divider"></div>
+  <div class="doc-block">
+    <div class="doc-h"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>Ambiente</div>
+    <ul class="amb-list">
+      <li><div class="amb-li-content">O fluxo é ativado quando a transportadora <strong>envia uma mensagem para o número UAZAPI</strong> fornecido pelo time de desenvolvimento — sem enviar a primeira mensagem, nada acontece.</div></li>
+      <li><div class="amb-li-content">A transportadora precisa estar <strong>cadastrada no TMS</strong> com CNPJ na tabela <code>filial_transportadora</code> — o fluxo valida o CNPJ informado antes de aceitar qualquer envio.</div></li>
+      <li><div class="amb-li-content">As notas fiscais precisam estar <strong>cadastradas no TMS</strong> — o fluxo valida cada nota recebida via API antes de registrar o canhoto.</div></li>
+    </ul>
   </div>
 </div>`;
 
-/* ═══════════════════════════════════════════════════════
-   DATA
-═══════════════════════════════════════════════════════ */
+
 const data = [
   {
     label: 'FLUXOS - TRACKING',
@@ -897,9 +1129,6 @@ const data = [
   }
 ];
 
-/* ═══════════════════════════════════════════════════════
-   RENDER
-═══════════════════════════════════════════════════════ */
 function render() {
   const root = document.getElementById('sections-root');
   root.innerHTML = '';
